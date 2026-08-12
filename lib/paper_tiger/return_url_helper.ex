@@ -38,11 +38,12 @@ defmodule PaperTiger.ReturnUrlHelper do
   end
 
   @doc """
-  The operator-facing message, worded as Stripe words it.
+  The operator-facing message. Stripe's own message names the specific resource,
+  so the caller passes `"PaymentIntent"` or `"SetupIntent"`.
   """
-  @spec error_message() :: String.t()
-  def error_message do
-    "This PaymentIntent or SetupIntent is configured to accept redirect-based " <>
+  @spec error_message(String.t()) :: String.t()
+  def error_message(resource) do
+    "This #{resource} is configured to accept redirect-based " <>
       "payment methods, so a return_url must be supplied. Pass return_url, or set " <>
       "automatic_payment_methods[allow_redirects]=never."
   end

@@ -83,6 +83,7 @@ defmodule PaperTiger.Resources.IntentRedirectReturnUrlTest do
       assert conn.status == 400
       error = json_response(conn)
       assert error["error"]["type"] == "invalid_request_error"
+      assert error["error"]["message"] =~ "This PaymentIntent"
       assert error["error"]["message"] =~ "return_url"
       assert error["error"]["param"] == "return_url"
     end
@@ -135,8 +136,32 @@ defmodule PaperTiger.Resources.IntentRedirectReturnUrlTest do
       assert conn.status == 400
       error = json_response(conn)
       assert error["error"]["type"] == "invalid_request_error"
+      assert error["error"]["message"] =~ "This SetupIntent"
       assert error["error"]["message"] =~ "return_url"
       assert error["error"]["param"] == "return_url"
+    end
+
+    test "accepts confirmation when the return_url is supplied at confirm time" do
+      id = create_setup_intent(%{"enabled" => "true"})
+
+      conn =
+        request(:post, "/v1/setup_intents/#{id}/confirm", %{
+          "return_url" => "https://example.test/return"
+        })
+
+      assert conn.status == 200
+    end
+
+    test "accepts confirmation when the return_url was supplied at create time" do
+      params = %{
+        "automatic_payment_methods" => %{"enabled" => "true"},
+        "payment_method" => "pm_card_visa",
+        "return_url" => "https://example.test/return"
+      }
+
+      id = request(:post, "/v1/setup_intents", params) |> json_response() |> Map.fetch!("id")
+
+      assert request(:post, "/v1/setup_intents/#{id}/confirm").status == 200
     end
 
     test "accepts confirmation when redirects are disallowed" do

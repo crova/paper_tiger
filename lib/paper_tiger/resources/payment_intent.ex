@@ -216,7 +216,10 @@ defmodule PaperTiger.Resources.PaymentIntent do
       {:error, :return_url_required} ->
         error_response(
           conn,
-          PaperTiger.Error.invalid_request(PaperTiger.ReturnUrlHelper.error_message(), "return_url")
+          PaperTiger.Error.invalid_request(
+            PaperTiger.ReturnUrlHelper.error_message("PaymentIntent"),
+            "return_url"
+          )
         )
 
       {:error, :not_confirmable, status} ->
